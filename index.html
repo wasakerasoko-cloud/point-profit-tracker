@@ -1,0 +1,1541 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101418">
+  <title>ポイント収益ノート</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7f8;
+      --ink: #121619;
+      --muted: #66727b;
+      --line: #dfe5e8;
+      --panel: #ffffff;
+      --panel-2: #eef4f2;
+      --brand: #0f766e;
+      --brand-2: #e03d55;
+      --good: #16895c;
+      --warn: #bd6a13;
+      --bad: #b42318;
+      --shadow: 0 12px 32px rgba(20, 33, 38, .1);
+      --radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Yu Gothic UI", Meiryo, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(16, 20, 24, .96) 0, rgba(16, 20, 24, .96) 248px, transparent 248px),
+        var(--bg);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1160px, 100%);
+      margin: 0 auto;
+      padding: 18px clamp(14px, 3vw, 28px) 92px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #fff;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 68% 28%, #e03d55 0 14%, transparent 15%),
+        radial-gradient(circle at 36% 62%, #28d7c9 0 16%, transparent 17%),
+        linear-gradient(135deg, #ffffff, #dfe5e8);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.55);
+      flex: 0 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(21px, 5vw, 31px);
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 3px 0 0;
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.18);
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .icon-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.2);
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid rgba(223, 229, 232, .85);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-height: 104px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .metric-value {
+      font-size: clamp(22px, 5vw, 32px);
+      line-height: 1.05;
+      font-weight: 850;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-sub {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .metric.good .metric-value {
+      color: var(--good);
+    }
+
+    .metric.bad .metric-value {
+      color: var(--bad);
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      background: rgba(245, 247, 248, .92);
+      backdrop-filter: blur(12px);
+      padding: 8px 0 10px;
+      margin: 0 -2px 8px;
+    }
+
+    .tab {
+      min-height: 42px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: var(--ink);
+      background: var(--panel);
+      border-color: var(--line);
+      box-shadow: 0 6px 18px rgba(20, 33, 38, .08);
+    }
+
+    main {
+      display: grid;
+      gap: 14px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: grid;
+      gap: 14px;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(20, 33, 38, .06);
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .head-sub {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .section-body {
+      padding: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 43px;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 11px;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 43px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .14);
+    }
+
+    .span-2 {
+      grid-column: span 2;
+    }
+
+    .span-4 {
+      grid-column: span 4;
+    }
+
+    .btn {
+      min-height: 43px;
+      border-radius: 8px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-weight: 850;
+      color: #fff;
+      background: var(--brand);
+    }
+
+    .btn.secondary {
+      color: var(--ink);
+      background: #edf2f4;
+      border: 1px solid var(--line);
+    }
+
+    .btn.danger {
+      background: var(--bad);
+    }
+
+    .btn.small {
+      min-height: 34px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filters select,
+    .filters input {
+      width: auto;
+      min-width: 140px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .empty {
+      border: 1px dashed #c9d3d7;
+      border-radius: 8px;
+      padding: 20px;
+      color: var(--muted);
+      text-align: center;
+      background: #fbfcfc;
+    }
+
+    .device-item, .entry-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      background: #fff;
+    }
+
+    .item-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .item-title {
+      font-weight: 850;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 0 9px;
+      background: #edf2f4;
+      color: #46535b;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pill.good {
+      color: #0f513b;
+      background: #dff5ea;
+    }
+
+    .pill.warn {
+      color: #6b3c05;
+      background: #fff0d6;
+    }
+
+    .pill.bad {
+      color: #842029;
+      background: #fde7e7;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .progress {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #edf2f4;
+    }
+
+    .progress > span {
+      display: block;
+      height: 100%;
+      width: var(--w, 0%);
+      background: linear-gradient(90deg, var(--brand), #35b8a8);
+    }
+
+    .device-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .stat {
+      background: var(--panel-2);
+      border-radius: 8px;
+      padding: 9px;
+      min-width: 0;
+    }
+
+    .stat small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .stat b {
+      font-size: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .chart {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 82px 1fr 88px;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .bar-track {
+      height: 24px;
+      background: #edf2f4;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      width: var(--w, 0%);
+      min-width: 2px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      border-radius: 999px;
+    }
+
+    .amount {
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      background: #f8fafb;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 20;
+      transform: translateX(-50%) translateY(80px);
+      opacity: 0;
+      min-width: min(420px, calc(100vw - 28px));
+      background: #101418;
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      transition: opacity .2s ease, transform .2s ease;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .hero-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .span-4 {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 620px) {
+      body {
+        background:
+          linear-gradient(180deg, rgba(16, 20, 24, .96) 0, rgba(16, 20, 24, .96) 228px, transparent 228px),
+          var(--bg);
+      }
+
+      .app {
+        padding-inline: 12px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .top-actions {
+        gap: 6px;
+      }
+
+      .icon-btn {
+        width: 38px;
+        height: 38px;
+      }
+
+      .hero-grid {
+        gap: 8px;
+      }
+
+      .metric {
+        min-height: 96px;
+        padding: 12px;
+      }
+
+      .nav {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+      }
+
+      .tab {
+        font-size: 11px;
+        gap: 4px;
+        min-height: 40px;
+      }
+
+      .tab .icon {
+        width: 17px;
+        height: 17px;
+      }
+
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .span-2,
+      .span-4 {
+        grid-column: span 1;
+      }
+
+      .filters {
+        width: 100%;
+      }
+
+      .filters select,
+      .filters input {
+        width: 100%;
+      }
+
+      .device-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .bar-row {
+        grid-template-columns: 68px 1fr 74px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>ポイント収益ノート</h1>
+          <p class="subtitle">端末仕入れと月次ポイントをまとめて記録</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="exportJsonBtn" title="JSONバックアップ">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+        </button>
+        <button class="icon-btn" id="exportCsvBtn" title="CSV出力">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"></path><path d="M8 4v16"></path><path d="M4 10h16"></path><path d="M4 16h16"></path></svg>
+        </button>
+        <button class="icon-btn" id="importBtn" title="JSON復元">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9"></path><path d="m17 14-5-5-5 5"></path><path d="M5 3h14"></path></svg>
+        </button>
+        <input class="file-input" id="importFile" type="file" accept="application/json">
+      </div>
+    </header>
+
+    <section class="hero-grid" aria-label="集計">
+      <div class="metric" id="metricProfit">
+        <div class="metric-label">累計利益</div>
+        <div class="metric-value" id="totalProfit">0円</div>
+        <div class="metric-sub" id="profitSub">収益 0円 - 仕入れ 0円</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">累計収益</div>
+        <div class="metric-value" id="totalRevenue">0円</div>
+        <div class="metric-sub" id="revenueSub">0 pt</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">仕入れ総額</div>
+        <div class="metric-value" id="totalCost">0円</div>
+        <div class="metric-sub" id="deviceSub">0台 登録中</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">今月の収益</div>
+        <div class="metric-value" id="thisMonthRevenue">0円</div>
+        <div class="metric-sub" id="monthSub">今月の記録 0件</div>
+      </div>
+    </section>
+
+    <nav class="nav" aria-label="表示切替">
+      <button class="tab active" data-view="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4z"></path><path d="M14 20h6V4h-6z"></path><path d="M4 20h6v-3H4z"></path></svg>
+        集計
+      </button>
+      <button class="tab" data-view="entries">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg>
+        月次
+      </button>
+      <button class="tab" data-view="devices">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"></rect><path d="M11 18h2"></path></svg>
+        端末
+      </button>
+      <button class="tab" data-view="settings">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"></path><path d="M5 8h14"></path><path d="M7 16h10"></path></svg>
+        設定
+      </button>
+    </nav>
+
+    <main>
+      <section class="view active" id="dashboard">
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <h2>月別収益</h2>
+              <div class="head-sub" id="chartSub">記録した月がここに並びます</div>
+            </div>
+            <div class="filters">
+              <select id="chartRange" aria-label="表示期間">
+                <option value="6">直近6か月</option>
+                <option value="12" selected>直近12か月</option>
+                <option value="all">全期間</option>
+              </select>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="chart" id="monthlyChart"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <h2>端末別の状況</h2>
+              <div class="head-sub">仕入れ額に対して、いくら回収できているかを表示</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="list" id="deviceSummaryList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="entries">
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <h2>月次ポイントを追加</h2>
+              <div class="head-sub">TikTok Liteや他アプリのポイントを月ごとに入力</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <form class="form-grid" id="entryForm">
+              <div class="field">
+                <label for="entryMonth">対象月</label>
+                <input id="entryMonth" type="month" required>
+              </div>
+              <div class="field">
+                <label for="entryDevice">端末</label>
+                <select id="entryDevice" required></select>
+              </div>
+              <div class="field">
+                <label for="entryApp">アプリ</label>
+                <input id="entryApp" type="text" value="TikTok Lite" required>
+              </div>
+              <div class="field">
+                <label for="entryPoints">ポイント</label>
+                <input id="entryPoints" type="number" inputmode="decimal" min="0" step="0.01" placeholder="例: 1200" required>
+              </div>
+              <div class="field">
+                <label for="entryRate">1ptあたり円</label>
+                <input id="entryRate" type="number" inputmode="decimal" min="0" step="0.01" value="1" required>
+              </div>
+              <div class="field span-2">
+                <label for="entryNote">メモ</label>
+                <input id="entryNote" type="text" placeholder="キャンペーン、交換日など">
+              </div>
+              <button class="btn" type="submit">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                追加
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <h2>月次記録</h2>
+              <div class="head-sub" id="entryCount">0件</div>
+            </div>
+            <div class="filters">
+              <input id="entrySearch" type="search" placeholder="検索">
+              <select id="entryFilterDevice" aria-label="端末で絞り込み"></select>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="list" id="entryList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="devices">
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <h2>端末を追加</h2>
+              <div class="head-sub">仕入れたスマホの購入額や入手元を保存</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <form class="form-grid" id="deviceForm">
+              <div class="field span-2">
+                <label for="deviceName">端末名</label>
+                <input id="deviceName" type="text" placeholder="例: iPhone SE 第2世代 A端末" required>
+              </div>
+              <div class="field">
+                <label for="deviceSource">仕入れ元</label>
+                <input id="deviceSource" type="text" placeholder="メルカリ">
+              </div>
+              <div class="field">
+                <label for="deviceDate">購入日</label>
+                <input id="deviceDate" type="date">
+              </div>
+              <div class="field">
+                <label for="deviceCost">仕入れ値</label>
+                <input id="deviceCost" type="number" inputmode="numeric" min="0" step="1" placeholder="例: 9800" required>
+              </div>
+              <div class="field">
+                <label for="deviceStatus">状態</label>
+                <select id="deviceStatus">
+                  <option value="active">稼働中</option>
+                  <option value="stock">準備中</option>
+                  <option value="paused">停止中</option>
+                  <option value="sold">売却済み</option>
+                </select>
+              </div>
+              <div class="field span-2">
+                <label for="deviceNote">メモ</label>
+                <input id="deviceNote" type="text" placeholder="SIM、バッテリー、アカウント状況など">
+              </div>
+              <button class="btn" type="submit">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                追加
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <h2>端末リスト</h2>
+              <div class="head-sub" id="deviceCount">0台</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="list" id="deviceList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="settings">
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <h2>データ操作</h2>
+              <div class="head-sub">バックアップ、復元、初期化</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="form-grid">
+              <button class="btn secondary" id="settingsExportJson" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+                JSONバックアップ
+              </button>
+              <button class="btn secondary" id="settingsExportCsv" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"></path><path d="M8 4v16"></path><path d="M4 10h16"></path><path d="M4 16h16"></path></svg>
+                CSV出力
+              </button>
+              <button class="btn secondary" id="settingsImport" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9"></path><path d="m17 14-5-5-5 5"></path><path d="M5 3h14"></path></svg>
+                JSON復元
+              </button>
+              <button class="btn danger" id="resetBtn" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 14h10l1-14"></path><path d="M9 7V4h6v3"></path></svg>
+                初期化
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <h2>保存先</h2>
+              <div class="head-sub">この端末のブラウザ内に自動保存</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  <tr><th>自動保存</th><td>入力や削除をするたびに保存されます。</td></tr>
+                  <tr><th>複数端末利用</th><td>端末ごとにデータは別保存です。JSONバックアップを使うと別端末へ移せます。</td></tr>
+                  <tr><th>金額計算</th><td>ポイント × 1ptあたり円で収益を計算します。</td></tr>
+                  <tr><th>回収表示</th><td>仕入れ値に対する累計収益と回収率を表示します。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = "point_profit_tracker_v1";
+
+    const state = loadState();
+
+    const els = {
+      totalProfit: document.getElementById("totalProfit"),
+      profitSub: document.getElementById("profitSub"),
+      metricProfit: document.getElementById("metricProfit"),
+      totalRevenue: document.getElementById("totalRevenue"),
+      revenueSub: document.getElementById("revenueSub"),
+      totalCost: document.getElementById("totalCost"),
+      deviceSub: document.getElementById("deviceSub"),
+      thisMonthRevenue: document.getElementById("thisMonthRevenue"),
+      monthSub: document.getElementById("monthSub"),
+      monthlyChart: document.getElementById("monthlyChart"),
+      chartSub: document.getElementById("chartSub"),
+      chartRange: document.getElementById("chartRange"),
+      deviceSummaryList: document.getElementById("deviceSummaryList"),
+      entryForm: document.getElementById("entryForm"),
+      entryMonth: document.getElementById("entryMonth"),
+      entryDevice: document.getElementById("entryDevice"),
+      entryApp: document.getElementById("entryApp"),
+      entryPoints: document.getElementById("entryPoints"),
+      entryRate: document.getElementById("entryRate"),
+      entryNote: document.getElementById("entryNote"),
+      entryList: document.getElementById("entryList"),
+      entryCount: document.getElementById("entryCount"),
+      entrySearch: document.getElementById("entrySearch"),
+      entryFilterDevice: document.getElementById("entryFilterDevice"),
+      deviceForm: document.getElementById("deviceForm"),
+      deviceName: document.getElementById("deviceName"),
+      deviceSource: document.getElementById("deviceSource"),
+      deviceDate: document.getElementById("deviceDate"),
+      deviceCost: document.getElementById("deviceCost"),
+      deviceStatus: document.getElementById("deviceStatus"),
+      deviceNote: document.getElementById("deviceNote"),
+      deviceList: document.getElementById("deviceList"),
+      deviceCount: document.getElementById("deviceCount"),
+      toast: document.getElementById("toast"),
+      importFile: document.getElementById("importFile")
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return normalizeState(parsed);
+        }
+      } catch (error) {
+        console.warn(error);
+      }
+
+      return normalizeState({
+        devices: [
+          {
+            id: makeId(),
+            name: "メイン端末",
+            source: "手持ち",
+            purchaseDate: todayDate(),
+            cost: 0,
+            status: "active",
+            note: ""
+          }
+        ],
+        entries: []
+      });
+    }
+
+    function normalizeState(data) {
+      return {
+        devices: Array.isArray(data.devices) ? data.devices.map(device => ({
+          id: String(device.id || makeId()),
+          name: String(device.name || "名称未設定"),
+          source: String(device.source || ""),
+          purchaseDate: String(device.purchaseDate || ""),
+          cost: toNumber(device.cost),
+          status: String(device.status || "active"),
+          note: String(device.note || "")
+        })) : [],
+        entries: Array.isArray(data.entries) ? data.entries.map(entry => ({
+          id: String(entry.id || makeId()),
+          month: String(entry.month || currentMonth()),
+          deviceId: String(entry.deviceId || ""),
+          app: String(entry.app || "TikTok Lite"),
+          points: toNumber(entry.points),
+          rate: toNumber(entry.rate || 1),
+          note: String(entry.note || "")
+        })) : []
+      };
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function makeId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function toNumber(value) {
+      const num = Number(value);
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function yen(value) {
+      return `${Math.round(toNumber(value)).toLocaleString("ja-JP")}円`;
+    }
+
+    function points(value) {
+      return `${toNumber(value).toLocaleString("ja-JP", { maximumFractionDigits: 2 })} pt`;
+    }
+
+    function currentMonth() {
+      return new Date().toISOString().slice(0, 7);
+    }
+
+    function todayDate() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function monthLabel(month) {
+      if (!month) return "-";
+      const [year, value] = month.split("-");
+      return `${year}/${value}`;
+    }
+
+    function statusLabel(status) {
+      return {
+        active: "稼働中",
+        stock: "準備中",
+        paused: "停止中",
+        sold: "売却済み"
+      }[status] || status;
+    }
+
+    function statusClass(status) {
+      return {
+        active: "good",
+        stock: "warn",
+        paused: "bad",
+        sold: ""
+      }[status] || "";
+    }
+
+    function entryRevenue(entry) {
+      return toNumber(entry.points) * toNumber(entry.rate);
+    }
+
+    function deviceRevenue(deviceId) {
+      return state.entries
+        .filter(entry => entry.deviceId === deviceId)
+        .reduce((sum, entry) => sum + entryRevenue(entry), 0);
+    }
+
+    function getDevice(id) {
+      return state.devices.find(device => device.id === id);
+    }
+
+    function totals() {
+      const cost = state.devices.reduce((sum, device) => sum + toNumber(device.cost), 0);
+      const revenue = state.entries.reduce((sum, entry) => sum + entryRevenue(entry), 0);
+      const pointTotal = state.entries.reduce((sum, entry) => sum + toNumber(entry.points), 0);
+      const thisMonthEntries = state.entries.filter(entry => entry.month === currentMonth());
+      const thisMonthRevenue = thisMonthEntries.reduce((sum, entry) => sum + entryRevenue(entry), 0);
+      return {
+        cost,
+        revenue,
+        pointTotal,
+        profit: revenue - cost,
+        thisMonthRevenue,
+        thisMonthCount: thisMonthEntries.length
+      };
+    }
+
+    function render() {
+      renderSelectors();
+      renderMetrics();
+      renderChart();
+      renderDeviceSummaries();
+      renderEntries();
+      renderDevices();
+    }
+
+    function renderSelectors() {
+      const options = state.devices
+        .map(device => `<option value="${escapeHtml(device.id)}">${escapeHtml(device.name)}</option>`)
+        .join("");
+      els.entryDevice.innerHTML = options || `<option value="">先に端末を追加</option>`;
+      const selectedFilter = els.entryFilterDevice.value;
+      els.entryFilterDevice.innerHTML = `<option value="">全端末</option>${options}`;
+      els.entryFilterDevice.value = selectedFilter;
+    }
+
+    function renderMetrics() {
+      const data = totals();
+      els.totalProfit.textContent = yen(data.profit);
+      els.profitSub.textContent = `収益 ${yen(data.revenue)} - 仕入れ ${yen(data.cost)}`;
+      els.metricProfit.classList.toggle("good", data.profit >= 0);
+      els.metricProfit.classList.toggle("bad", data.profit < 0);
+      els.totalRevenue.textContent = yen(data.revenue);
+      els.revenueSub.textContent = points(data.pointTotal);
+      els.totalCost.textContent = yen(data.cost);
+      const activeCount = state.devices.filter(device => device.status === "active").length;
+      els.deviceSub.textContent = `${state.devices.length}台 登録中 / 稼働 ${activeCount}台`;
+      els.thisMonthRevenue.textContent = yen(data.thisMonthRevenue);
+      els.monthSub.textContent = `今月の記録 ${data.thisMonthCount}件`;
+    }
+
+    function renderChart() {
+      const grouped = new Map();
+      state.entries.forEach(entry => {
+        grouped.set(entry.month, (grouped.get(entry.month) || 0) + entryRevenue(entry));
+      });
+
+      let rows = [...grouped.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+      const range = els.chartRange.value;
+      if (range !== "all") rows = rows.slice(-Number(range));
+
+      if (!rows.length) {
+        els.monthlyChart.innerHTML = `<div class="empty">月次ポイントを追加するとグラフが表示されます。</div>`;
+        els.chartSub.textContent = "記録した月がここに並びます";
+        return;
+      }
+
+      const max = Math.max(...rows.map(row => row[1]), 1);
+      els.chartSub.textContent = `${monthLabel(rows[0][0])} から ${monthLabel(rows[rows.length - 1][0])}`;
+      els.monthlyChart.innerHTML = rows.map(([month, revenue]) => `
+        <div class="bar-row">
+          <b>${escapeHtml(monthLabel(month))}</b>
+          <div class="bar-track"><div class="bar" style="--w:${Math.max(4, revenue / max * 100)}%"></div></div>
+          <div class="amount">${yen(revenue)}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderDeviceSummaries() {
+      if (!state.devices.length) {
+        els.deviceSummaryList.innerHTML = `<div class="empty">端末を追加すると、回収状況が表示されます。</div>`;
+        return;
+      }
+
+      els.deviceSummaryList.innerHTML = state.devices
+        .map(device => deviceSummaryHtml(device))
+        .join("");
+    }
+
+    function deviceSummaryHtml(device) {
+      const revenue = deviceRevenue(device.id);
+      const cost = toNumber(device.cost);
+      const profit = revenue - cost;
+      const rate = cost > 0 ? Math.min(100, revenue / cost * 100) : (revenue > 0 ? 100 : 0);
+      const remain = Math.max(0, cost - revenue);
+      const recovered = cost > 0 && revenue >= cost;
+      return `
+        <article class="device-item">
+          <div class="item-top">
+            <div>
+              <div class="item-title">${escapeHtml(device.name)}</div>
+              <div class="item-meta">
+                <span class="pill ${statusClass(device.status)}">${escapeHtml(statusLabel(device.status))}</span>
+                <span>${escapeHtml(device.source || "仕入れ元なし")}</span>
+                <span>${escapeHtml(device.purchaseDate || "購入日なし")}</span>
+              </div>
+            </div>
+            <span class="pill ${recovered ? "good" : "warn"}">${recovered ? "回収済み" : "回収中"}</span>
+          </div>
+          <div class="progress" aria-label="回収率"><span style="--w:${rate}%"></span></div>
+          <div class="device-stats">
+            <div class="stat"><small>仕入れ値</small><b>${yen(cost)}</b></div>
+            <div class="stat"><small>累計収益</small><b>${yen(revenue)}</b></div>
+            <div class="stat"><small>利益</small><b>${yen(profit)}</b></div>
+            <div class="stat"><small>残り回収</small><b>${yen(remain)}</b></div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderEntries() {
+      const query = els.entrySearch.value.trim().toLowerCase();
+      const filterDevice = els.entryFilterDevice.value;
+      let rows = [...state.entries].sort((a, b) => b.month.localeCompare(a.month));
+
+      if (filterDevice) rows = rows.filter(entry => entry.deviceId === filterDevice);
+      if (query) {
+        rows = rows.filter(entry => {
+          const deviceName = getDevice(entry.deviceId)?.name || "";
+          return `${entry.month} ${entry.app} ${entry.note} ${deviceName}`.toLowerCase().includes(query);
+        });
+      }
+
+      els.entryCount.textContent = `${rows.length}件`;
+      if (!rows.length) {
+        els.entryList.innerHTML = `<div class="empty">まだ月次記録がありません。</div>`;
+        return;
+      }
+
+      els.entryList.innerHTML = rows.map(entry => {
+        const device = getDevice(entry.deviceId);
+        return `
+          <article class="entry-item">
+            <div class="item-top">
+              <div>
+                <div class="item-title">${escapeHtml(monthLabel(entry.month))} / ${escapeHtml(entry.app)}</div>
+                <div class="item-meta">
+                  <span>${escapeHtml(device?.name || "端末なし")}</span>
+                  <span>${points(entry.points)}</span>
+                  <span>${entry.rate}円/pt</span>
+                  ${entry.note ? `<span>${escapeHtml(entry.note)}</span>` : ""}
+                </div>
+              </div>
+              <div class="item-actions">
+                <button class="btn secondary small" data-edit-entry="${escapeHtml(entry.id)}" type="button">編集</button>
+                <button class="btn danger small" data-delete-entry="${escapeHtml(entry.id)}" type="button">削除</button>
+              </div>
+            </div>
+            <div class="device-stats">
+              <div class="stat"><small>収益</small><b>${yen(entryRevenue(entry))}</b></div>
+              <div class="stat"><small>対象月</small><b>${escapeHtml(monthLabel(entry.month))}</b></div>
+              <div class="stat"><small>端末</small><b>${escapeHtml(device?.name || "-")}</b></div>
+              <div class="stat"><small>アプリ</small><b>${escapeHtml(entry.app)}</b></div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderDevices() {
+      els.deviceCount.textContent = `${state.devices.length}台`;
+      if (!state.devices.length) {
+        els.deviceList.innerHTML = `<div class="empty">まだ端末がありません。</div>`;
+        return;
+      }
+
+      els.deviceList.innerHTML = state.devices.map(device => `
+        <article class="device-item">
+          <div class="item-top">
+            <div>
+              <div class="item-title">${escapeHtml(device.name)}</div>
+              <div class="item-meta">
+                <span class="pill ${statusClass(device.status)}">${escapeHtml(statusLabel(device.status))}</span>
+                <span>${escapeHtml(device.source || "仕入れ元なし")}</span>
+                <span>${escapeHtml(device.purchaseDate || "購入日なし")}</span>
+                ${device.note ? `<span>${escapeHtml(device.note)}</span>` : ""}
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn secondary small" data-edit-device="${escapeHtml(device.id)}" type="button">編集</button>
+              <button class="btn danger small" data-delete-device="${escapeHtml(device.id)}" type="button">削除</button>
+            </div>
+          </div>
+          <div class="device-stats">
+            <div class="stat"><small>仕入れ値</small><b>${yen(device.cost)}</b></div>
+            <div class="stat"><small>累計収益</small><b>${yen(deviceRevenue(device.id))}</b></div>
+            <div class="stat"><small>記録数</small><b>${state.entries.filter(entry => entry.deviceId === device.id).length}件</b></div>
+            <div class="stat"><small>状態</small><b>${escapeHtml(statusLabel(device.status))}</b></div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function toast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      window.clearTimeout(toast.timer);
+      toast.timer = window.setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+
+    function setTodayDefaults() {
+      els.entryMonth.value = currentMonth();
+      els.deviceDate.value = todayDate();
+    }
+
+    function switchView(id) {
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === id));
+      document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === id));
+    }
+
+    function submitDevice(event) {
+      event.preventDefault();
+      const editingId = els.deviceForm.dataset.editingId;
+      const payload = {
+        name: els.deviceName.value.trim(),
+        source: els.deviceSource.value.trim(),
+        purchaseDate: els.deviceDate.value,
+        cost: toNumber(els.deviceCost.value),
+        status: els.deviceStatus.value,
+        note: els.deviceNote.value.trim()
+      };
+
+      if (!payload.name) return toast("端末名を入力してください。");
+
+      if (editingId) {
+        const index = state.devices.findIndex(device => device.id === editingId);
+        if (index >= 0) state.devices[index] = { ...state.devices[index], ...payload };
+        delete els.deviceForm.dataset.editingId;
+        els.deviceForm.querySelector(".btn").lastChild.textContent = " 追加";
+        toast("端末を更新しました。");
+      } else {
+        state.devices.push({ id: makeId(), ...payload });
+        toast("端末を追加しました。");
+      }
+
+      els.deviceForm.reset();
+      els.deviceDate.value = todayDate();
+      saveState();
+      render();
+    }
+
+    function submitEntry(event) {
+      event.preventDefault();
+      if (!state.devices.length) return toast("先に端末を追加してください。");
+
+      const editingId = els.entryForm.dataset.editingId;
+      const payload = {
+        month: els.entryMonth.value,
+        deviceId: els.entryDevice.value,
+        app: els.entryApp.value.trim() || "TikTok Lite",
+        points: toNumber(els.entryPoints.value),
+        rate: toNumber(els.entryRate.value),
+        note: els.entryNote.value.trim()
+      };
+
+      if (!payload.month || !payload.deviceId) return toast("対象月と端末を選んでください。");
+
+      if (editingId) {
+        const index = state.entries.findIndex(entry => entry.id === editingId);
+        if (index >= 0) state.entries[index] = { ...state.entries[index], ...payload };
+        delete els.entryForm.dataset.editingId;
+        els.entryForm.querySelector(".btn").lastChild.textContent = " 追加";
+        toast("月次記録を更新しました。");
+      } else {
+        state.entries.push({ id: makeId(), ...payload });
+        toast("月次記録を追加しました。");
+      }
+
+      els.entryPoints.value = "";
+      els.entryNote.value = "";
+      els.entryMonth.value = currentMonth();
+      saveState();
+      render();
+    }
+
+    function deleteDevice(id) {
+      const device = getDevice(id);
+      if (!device) return;
+      if (!confirm(`${device.name} を削除しますか？関連する月次記録も削除されます。`)) return;
+      state.devices = state.devices.filter(item => item.id !== id);
+      state.entries = state.entries.filter(entry => entry.deviceId !== id);
+      saveState();
+      render();
+      toast("端末を削除しました。");
+    }
+
+    function deleteEntry(id) {
+      if (!confirm("この月次記録を削除しますか？")) return;
+      state.entries = state.entries.filter(entry => entry.id !== id);
+      saveState();
+      render();
+      toast("月次記録を削除しました。");
+    }
+
+    function editDevice(id) {
+      const device = getDevice(id);
+      if (!device) return;
+      switchView("devices");
+      els.deviceForm.dataset.editingId = id;
+      els.deviceName.value = device.name;
+      els.deviceSource.value = device.source;
+      els.deviceDate.value = device.purchaseDate;
+      els.deviceCost.value = device.cost;
+      els.deviceStatus.value = device.status;
+      els.deviceNote.value = device.note;
+      els.deviceName.focus();
+      els.deviceForm.querySelector(".btn").lastChild.textContent = " 更新";
+    }
+
+    function editEntry(id) {
+      const entry = state.entries.find(item => item.id === id);
+      if (!entry) return;
+      switchView("entries");
+      els.entryForm.dataset.editingId = id;
+      els.entryMonth.value = entry.month;
+      els.entryDevice.value = entry.deviceId;
+      els.entryApp.value = entry.app;
+      els.entryPoints.value = entry.points;
+      els.entryRate.value = entry.rate;
+      els.entryNote.value = entry.note;
+      els.entryPoints.focus();
+      els.entryForm.querySelector(".btn").lastChild.textContent = " 更新";
+    }
+
+    function exportJson() {
+      downloadFile(`point-profit-backup-${todayDate()}.json`, JSON.stringify(state, null, 2), "application/json");
+      toast("JSONを書き出しました。");
+    }
+
+    function exportCsv() {
+      const deviceRows = [["種別","ID","端末名","仕入れ元","購入日","仕入れ値","状態","メモ"]];
+      state.devices.forEach(device => {
+        deviceRows.push(["端末", device.id, device.name, device.source, device.purchaseDate, device.cost, statusLabel(device.status), device.note]);
+      });
+
+      const entryRows = [["種別","対象月","端末名","アプリ","ポイント","1pt円","収益","メモ"]];
+      state.entries.forEach(entry => {
+        entryRows.push(["月次", entry.month, getDevice(entry.deviceId)?.name || "", entry.app, entry.points, entry.rate, entryRevenue(entry), entry.note]);
+      });
+
+      const csv = [...deviceRows, [], ...entryRows].map(row => row.map(csvCell).join(",")).join("\n");
+      downloadFile(`point-profit-records-${todayDate()}.csv`, "\ufeff" + csv, "text/csv");
+      toast("CSVを書き出しました。");
+    }
+
+    function csvCell(value) {
+      const text = String(value ?? "");
+      return `"${text.replace(/"/g, '""')}"`;
+    }
+
+    function downloadFile(name, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = normalizeState(JSON.parse(reader.result));
+          state.devices = imported.devices;
+          state.entries = imported.entries;
+          saveState();
+          render();
+          toast("JSONを復元しました。");
+        } catch (error) {
+          console.error(error);
+          toast("JSONを読み込めませんでした。");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetData() {
+      if (!confirm("すべてのデータを初期化しますか？")) return;
+      state.devices = [];
+      state.entries = [];
+      saveState();
+      render();
+      toast("初期化しました。");
+    }
+
+    function bindEvents() {
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => switchView(tab.dataset.view));
+      });
+
+      els.deviceForm.addEventListener("submit", submitDevice);
+      els.entryForm.addEventListener("submit", submitEntry);
+      els.chartRange.addEventListener("change", renderChart);
+      els.entrySearch.addEventListener("input", renderEntries);
+      els.entryFilterDevice.addEventListener("change", renderEntries);
+
+      document.body.addEventListener("click", event => {
+        const deleteDeviceButton = event.target.closest("[data-delete-device]");
+        const editDeviceButton = event.target.closest("[data-edit-device]");
+        const deleteEntryButton = event.target.closest("[data-delete-entry]");
+        const editEntryButton = event.target.closest("[data-edit-entry]");
+
+        if (deleteDeviceButton) deleteDevice(deleteDeviceButton.dataset.deleteDevice);
+        if (editDeviceButton) editDevice(editDeviceButton.dataset.editDevice);
+        if (deleteEntryButton) deleteEntry(deleteEntryButton.dataset.deleteEntry);
+        if (editEntryButton) editEntry(editEntryButton.dataset.editEntry);
+      });
+
+      ["exportJsonBtn", "settingsExportJson"].forEach(id => document.getElementById(id).addEventListener("click", exportJson));
+      ["exportCsvBtn", "settingsExportCsv"].forEach(id => document.getElementById(id).addEventListener("click", exportCsv));
+      ["importBtn", "settingsImport"].forEach(id => document.getElementById(id).addEventListener("click", () => els.importFile.click()));
+      els.importFile.addEventListener("change", event => {
+        const file = event.target.files[0];
+        if (file) importJson(file);
+        event.target.value = "";
+      });
+      document.getElementById("resetBtn").addEventListener("click", resetData);
+    }
+
+    bindEvents();
+    setTodayDefaults();
+    render();
+  </script>
+</body>
+</html>
